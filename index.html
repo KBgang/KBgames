@@ -1,0 +1,1925 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>KBgames | Crazy Time, Рулетка, Dog House, Crash, Спорт, Кости</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Poppins', system-ui, -apple-system, sans-serif;
+            transition: background 0.3s, color 0.3s;
+            overflow-x: hidden;
+        }
+
+        body.theme-dark {
+            background: linear-gradient(145deg, #0a0f2a 0%, #030617 100%);
+            color: white;
+        }
+
+        body.theme-light {
+            background: linear-gradient(145deg, #e0e5f5 0%, #c8d0e8 100%);
+            color: #1a1a2e;
+        }
+
+        body.theme-light .sidebar,
+        body.theme-light .game-container,
+        body.theme-light .crash-container,
+        body.theme-light .finance-container,
+        body.theme-light .event-card,
+        body.theme-light .dice-container,
+        body.theme-light .user-panel,
+        body.theme-light .modal-window {
+            background: rgba(200, 210, 240, 0.9);
+            color: #1a1a2e;
+        }
+
+        body.theme-light .nav-item {
+            background: rgba(100, 120, 180, 0.3);
+            color: #1a1a2e;
+        }
+
+        body.theme-light .nav-item.active {
+            background: #2b6ef0;
+            color: white;
+        }
+
+        body.theme-light button {
+            background: #2b6ef0;
+            color: white;
+        }
+
+        body.theme-light .balance {
+            background: #d0d8f0;
+            color: #1a4fbf;
+        }
+
+        .toast-notify {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: #1e2a3a;
+            border-left: 5px solid #2b6ef0;
+            padding: 12px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            z-index: 3000;
+            font-weight: 500;
+            backdrop-filter: blur(8px);
+            animation: slideIn 0.3s ease;
+            pointer-events: none;
+        }
+
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(100px);}
+            to { opacity: 1; transform: translateX(0);}
+        }
+
+        .app {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        .sidebar {
+            width: 260px;
+            background: rgba(8, 12, 25, 0.96);
+            backdrop-filter: blur(10px);
+            border-right: 2px solid #2b6ef0;
+            padding: 20px 0;
+            position: fixed;
+            height: 100vh;
+            overflow-y: auto;
+            z-index: 10;
+        }
+
+        .logo {
+            font-size: 28px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px 0 20px;
+            background: linear-gradient(135deg, #2b6ef0, #80b3ff);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            letter-spacing: 1px;
+        }
+
+        .nav-item {
+            padding: 14px 24px;
+            margin: 6px 12px;
+            border-radius: 40px;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            background: rgba(255,255,255,0.05);
+            color: #e0e0ff;
+        }
+
+        .nav-item.active {
+            background: linear-gradient(95deg, #2b6ef0, #1a4fbf);
+            color: white;
+            box-shadow: 0 4px 12px rgba(43,110,240,0.4);
+        }
+
+        .main-content {
+            margin-left: 260px;
+            flex: 1;
+            padding: 20px 28px;
+        }
+
+        .user-panel {
+            display: flex;
+            justify-content: flex-end;
+            gap: 20px;
+            align-items: center;
+            background: rgba(0,0,0,0.55);
+            padding: 12px 24px;
+            border-radius: 60px;
+            margin-bottom: 30px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #2b6ef0;
+        }
+
+        .balance {
+            background: #0a1128;
+            padding: 6px 20px;
+            border-radius: 40px;
+            font-weight: bold;
+            font-size: 20px;
+            color: #80b3ff;
+            font-family: monospace;
+        }
+
+        button {
+            background: #1f2a48;
+            border: none;
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.2s;
+        }
+
+        .btn-gold {
+            background: #2b6ef0;
+            color: white;
+            box-shadow: 0 2px 10px rgba(43,110,240,0.4);
+        }
+
+        .btn-gold:hover {
+            background: #1a4fbf;
+            transform: scale(1.02);
+        }
+
+        .game-section {
+            display: none;
+            animation: fade 0.3s ease;
+        }
+
+        .game-section.active-game {
+            display: block;
+        }
+
+        @keyframes fade {
+            from { opacity: 0; transform: translateY(8px);}
+            to { opacity: 1; transform: translateY(0);}
+        }
+
+        .game-container {
+            background: rgba(6, 12, 28, 0.85);
+            border-radius: 32px;
+            padding: 24px;
+            margin-top: 20px;
+            backdrop-filter: blur(4px);
+            border: 1px solid #2b6ef0;
+        }
+
+        .bet-input {
+            margin: 20px 0;
+            display: flex;
+            gap: 15px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .bet-input input, .bet-input select {
+            background: #0c1530;
+            border: 1px solid #2b6ef0;
+            padding: 10px 15px;
+            border-radius: 30px;
+            color: white;
+            font-size: 16px;
+            width: 150px;
+        }
+
+        .crazy-bets {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .crazy-bet-btn {
+            background: #1e293b;
+            padding: 8px 16px;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 1px solid #2b6ef0;
+        }
+
+        .crazy-bet-btn.selected {
+            background: #2b6ef0;
+            color: white;
+            box-shadow: 0 0 8px #2b6ef0;
+        }
+
+        .slots-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            background: #0b1120;
+            padding: 18px;
+            border-radius: 28px;
+        }
+
+        .slot-cell {
+            background: #142044;
+            aspect-ratio: 1;
+            border-radius: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 32px;
+            box-shadow: inset 0 0 5px #2b6ef0;
+        }
+
+        .crash-container {
+            background: radial-gradient(circle at 20% 30%, #0a0e1c, #040717);
+            border-radius: 48px;
+            padding: 20px;
+            border: 1px solid #2b6ef0;
+        }
+
+        .graph-wrapper {
+            background: #030611;
+            border-radius: 32px;
+            padding: 8px;
+            margin-bottom: 24px;
+            position: relative;
+        }
+
+        #crashCanvas {
+            width: 100%;
+            height: 320px;
+            display: block;
+            background: #030611;
+            border-radius: 28px;
+        }
+
+        .multiplier-badge {
+            position: absolute;
+            top: 20px;
+            right: 30px;
+            background: #0f1a2fcc;
+            backdrop-filter: blur(12px);
+            padding: 12px 28px;
+            border-radius: 80px;
+            font-size: 2rem;
+            font-weight: 800;
+            font-family: monospace;
+            border-left: 4px solid #f0b32b;
+            color: #ffdd77;
+        }
+
+        .crash-btn {
+            background: linear-gradient(95deg, #1e3a8a, #0f2a6f);
+            border: none;
+            padding: 12px 32px;
+            border-radius: 48px;
+            font-weight: bold;
+            font-size: 1rem;
+            color: white;
+            cursor: pointer;
+        }
+
+        .crash-btn.cashout {
+            background: linear-gradient(95deg, #16a34a, #0e7a36);
+        }
+
+        .history-container {
+            margin-top: 20px;
+            background: #071020cc;
+            border-radius: 32px;
+            padding: 16px;
+        }
+
+        .history-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .history-chip {
+            background: #0f1935;
+            padding: 6px 18px;
+            border-radius: 40px;
+            font-family: monospace;
+            font-weight: bold;
+            font-size: 0.9rem;
+            border-left: 3px solid #2b6ef0;
+        }
+
+        .sport-events { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); 
+            gap: 18px; 
+        }
+
+        .event-card { 
+            background: #0f1a30; 
+            padding: 14px; 
+            border-radius: 24px; 
+            border-left: 4px solid #2b6ef0; 
+        }
+
+        .sport-odds { 
+            display: flex; 
+            gap: 15px; 
+            margin: 12px 0; 
+            flex-wrap: wrap; 
+        }
+
+        .odd-btn { 
+            background: #1f2a44; 
+            padding: 6px 14px; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            font-size: 14px; 
+            border: 1px solid #3b5bc0; 
+        }
+
+        .odd-btn.selected { 
+            background: #2b6ef0; 
+            box-shadow: 0 0 8px #2b6ef0; 
+            border-color: white; 
+        }
+
+        .home-hero { 
+            background: linear-gradient(135deg, #0b1230, #030617); 
+            border-radius: 48px; 
+            padding: 30px; 
+            margin-bottom: 30px; 
+            text-align: center; 
+            border: 1px solid #2b6ef0; 
+        }
+
+        .game-grid { 
+            display: grid; 
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); 
+            gap: 24px; 
+            margin-top: 25px; 
+        }
+
+        .game-card-new { 
+            background: rgba(15, 30, 60, 0.75); 
+            backdrop-filter: blur(8px); 
+            border-radius: 28px; 
+            padding: 28px 12px; 
+            text-align: center; 
+            cursor: pointer; 
+            border: 1px solid #2b6ef0; 
+            transition: 0.2s; 
+        }
+
+        .game-card-new:hover { 
+            transform: translateY(-5px); 
+            background: #2b6ef0; 
+            color: white; 
+        }
+
+        .profile-row { 
+            margin: 20px 0; 
+            background: #0f1a30; 
+            padding: 20px; 
+            border-radius: 32px; 
+            display: flex; 
+            gap: 20px; 
+            align-items: center; 
+            flex-wrap: wrap; 
+        }
+
+        .dice-container { 
+            background: #0f1a30; 
+            border-radius: 36px; 
+            padding: 30px; 
+            text-align: center; 
+            margin-top: 20px; 
+        }
+
+        .dice { 
+            display: inline-block; 
+            font-size: 70px; 
+            margin: 10px; 
+            background: #142044; 
+            padding: 15px; 
+            border-radius: 28px; 
+            box-shadow: 0 0 10px #2b6ef0; 
+        }
+
+        .roulette-buttons { 
+            display: flex; 
+            flex-wrap: wrap; 
+            gap: 10px; 
+            margin: 15px 0; 
+        }
+
+        .roul-bet { 
+            background: #1f2a44; 
+            padding: 8px 16px; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+
+        .roul-bet.selected-roulette { 
+            background: #2b6ef0; 
+            box-shadow: 0 0 8px #2b6ef0; 
+            transform: scale(1.02); 
+        }
+
+        .dog-result { 
+            margin-top: 20px; 
+            background: #0a1225; 
+            border-radius: 28px; 
+            padding: 12px; 
+            text-align: center; 
+            border: 1px solid #2b6ef0; 
+        }
+
+        .status-text { 
+            background: #0a1225; 
+            border-radius: 40px; 
+            padding: 12px; 
+            margin-top: 20px; 
+            text-align: center; 
+            color: #b0cbff; 
+        }
+
+        .finance-container { 
+            background: linear-gradient(135deg, #0c1535, #060a1a); 
+            border-radius: 32px; 
+            padding: 30px; 
+            margin-top: 20px; 
+        }
+
+        .finance-buttons { 
+            display: flex; 
+            gap: 20px; 
+            margin-bottom: 30px; 
+        }
+
+        .finance-btn { 
+            padding: 12px 30px; 
+            border-radius: 40px; 
+            cursor: pointer; 
+            background: #1f2a48; 
+            transition: 0.2s; 
+        }
+
+        .finance-btn.active-finance { 
+            background: #2b6ef0; 
+            box-shadow: 0 0 10px #2b6ef0; 
+        }
+
+        .finance-card { 
+            background: #0a1225; 
+            border-radius: 28px; 
+            padding: 25px; 
+            margin-top: 20px; 
+            border: 1px solid #2b6ef0; 
+        }
+
+        .finance-input { 
+            padding: 12px; 
+            background: #0c1530; 
+            border: 1px solid #2b6ef0; 
+            border-radius: 30px; 
+            color: white; 
+            font-size: 16px; 
+            width: 250px; 
+        }
+
+        .modal-overlay {
+            position: fixed;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.85);
+            backdrop-filter: blur(12px);
+            z-index: 4000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-window {
+            background: linear-gradient(145deg, #0f1a3a, #070c1a);
+            border-radius: 48px;
+            padding: 30px;
+            min-width: 400px;
+            border: 2px solid #2b6ef0;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.5);
+        }
+
+        .bonus-game {
+            background: radial-gradient(circle, #1a2a4a, #0a0f2a);
+            border-radius: 40px;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .coinflip-options { 
+            display: flex; 
+            gap: 30px; 
+            justify-content: center; 
+            margin: 20px 0; 
+        }
+
+        .color-btn { 
+            padding: 20px 40px; 
+            border-radius: 60px; 
+            font-size: 24px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+        }
+
+        .color-red { 
+            background: #e74c3c; 
+        }
+
+        .color-blue { 
+            background: #3498db; 
+        }
+
+        .cash-grid { 
+            display: grid; 
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 12px; 
+            margin: 20px 0; 
+            max-height: 400px; 
+            overflow-y: auto; 
+        }
+
+        .cash-cell { 
+            background: #1e2a4a; 
+            aspect-ratio: 1; 
+            border-radius: 16px; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 20px; 
+            cursor: pointer; 
+            transition: 0.2s; 
+            border: 1px solid #2b6ef0; 
+        }
+
+        .cash-cell:hover { 
+            background: #2b6ef0; 
+            transform: scale(1.05); 
+        }
+
+        .pachinko-slots { 
+            display: flex; 
+            gap: 15px; 
+            justify-content: center; 
+            margin: 30px 0; 
+            flex-wrap: wrap; 
+        }
+
+        .pachinko-slot { 
+            background: #1e2a4a; 
+            padding: 20px 30px; 
+            border-radius: 30px; 
+            font-size: 18px; 
+            border: 1px solid #f0b32b; 
+        }
+
+        .info-block { 
+            background: rgba(0,0,0,0.3); 
+            border-radius: 24px; 
+            padding: 15px; 
+            margin-bottom: 20px; 
+            font-size: 14px; 
+        }
+
+        @media (max-width: 780px) { 
+            .sidebar { 
+                width: 80px; 
+            } 
+            .sidebar span:not(.emoji) { 
+                display: none; 
+            } 
+            .main-content { 
+                margin-left: 80px; 
+            } 
+        }
+    </style>
+</head>
+<body>
+<div id="authContainer"></div>
+<div id="appContainer" style="display:none;"></div>
+
+<script>
+    // ========== ГЛОБАЛЬНЫЕ ПЕРЕМЕННЫЕ ==========
+    let userData = null;
+    let balance = 0;
+    let gameHistory = [];
+    let depositHistory = [];
+    let withdrawHistory = [];
+    let currentNickname = '';
+
+    // ========== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ==========
+    function showToast(msg, isError = false) {
+        const toast = document.createElement('div');
+        toast.className = 'toast-notify';
+        toast.style.borderLeftColor = isError ? '#e74c3c' : '#2b6ef0';
+        toast.innerText = msg;
+        document.body.appendChild(toast);
+        setTimeout(() => toast.remove(), 2500);
+    }
+
+    function saveAllData() {
+        if (userData) {
+            userData.balance = balance;
+            userData.nickname = currentNickname;
+            localStorage.setItem('kbgames_user', JSON.stringify(userData));
+        }
+        localStorage.setItem('kbgames_history', JSON.stringify(gameHistory));
+        localStorage.setItem('kbgames_deposits', JSON.stringify(depositHistory));
+        localStorage.setItem('kbgames_withdraws', JSON.stringify(withdrawHistory));
+    }
+
+    function updateBalanceUI() {
+        const balanceSpan = document.getElementById('balanceAmount');
+        const profileBalance = document.getElementById('profileBalance');
+        if (balanceSpan) balanceSpan.innerText = Math.floor(balance);
+        if (profileBalance) profileBalance.innerText = Math.floor(balance);
+        saveAllData();
+    }
+
+    function updateNicknameUI() {
+        const nicknameSpan = document.getElementById('nicknameDisplay');
+        if (nicknameSpan) nicknameSpan.innerText = currentNickname;
+        saveAllData();
+    }
+
+    function addGameRecord(gameName, bet, win, result) {
+        gameHistory.unshift({
+            game: gameName,
+            bet: Math.floor(bet),
+            win: Math.floor(win),
+            time: new Date().toLocaleTimeString(),
+            result: result
+        });
+        if (gameHistory.length > 30) gameHistory.pop();
+        renderHistory();
+        saveAllData();
+    }
+
+    function addDepositRecord(amount) {
+        depositHistory.unshift({ amount: amount, date: new Date().toLocaleString() });
+        renderHistory();
+        saveAllData();
+    }
+
+    function addWithdrawRecord(amount) {
+        withdrawHistory.unshift({ amount: amount, date: new Date().toLocaleString() });
+        renderHistory();
+        saveAllData();
+    }
+
+    function renderHistory() {
+        const gameHistoryList = document.getElementById('gameHistoryList');
+        const depositHistoryList = document.getElementById('depositHistoryList');
+        const withdrawHistoryList = document.getElementById('withdrawHistoryList');
+        
+        if (gameHistoryList) {
+            gameHistoryList.innerHTML = gameHistory.length 
+                ? gameHistory.map(h => `<div class="history-chip">🎲 ${h.game} | ${h.bet}₽ → ${h.win}₽ | ${h.result}</div>`).join('')
+                : '<div class="history-chip">Нет записей</div>';
+        }
+        
+        if (depositHistoryList) {
+            depositHistoryList.innerHTML = depositHistory.length 
+                ? depositHistory.map(d => `<div class="history-chip">➕ +${d.amount}₽ | ${d.date}</div>`).join('')
+                : '<div class="history-chip">Нет пополнений</div>';
+        }
+        
+        if (withdrawHistoryList) {
+            withdrawHistoryList.innerHTML = withdrawHistory.length 
+                ? withdrawHistory.map(w => `<div class="history-chip">➖ -${w.amount}₽ | ${w.date}</div>`).join('')
+                : '<div class="history-chip">Нет выводов</div>';
+        }
+    }
+
+    function checkBalance(betAmount) {
+        if (betAmount > balance) {
+            showToast(`Не хватает средств! Баланс: ${balance} ₽`, true);
+            return false;
+        }
+        return true;
+    }
+
+    function deductBet(betAmount) {
+        balance -= betAmount;
+        updateBalanceUI();
+        return true;
+    }
+
+    function addWin(winAmount) {
+        balance += winAmount;
+        updateBalanceUI();
+    }
+
+    function getWeightedMultiplier(options) {
+        let totalWeight = 0;
+        for (let opt of options) totalWeight += opt.weight;
+        let random = Math.random() * totalWeight;
+        let accum = 0;
+        for (let opt of options) {
+            accum += opt.weight;
+            if (random <= accum) return opt.value;
+        }
+        return options[0].value;
+    }
+
+    // ========== БОНУСНЫЕ ИГРЫ ==========
+    function showBonusGame(bonusType, betAmount) {
+        const modal = document.createElement('div');
+        modal.className = 'modal-overlay';
+        
+        const bonusConfigs = {
+            coinflip: {
+                multipliers: [
+                    { value: 2, weight: 30 }, { value: 5, weight: 25 }, { value: 10, weight: 20 },
+                    { value: 20, weight: 12 }, { value: 50, weight: 8 }, { value: 75, weight: 3 },
+                    { value: 100, weight: 2 }
+                ],
+                content: `
+                    <div class="bonus-game">
+                        <h2>🎲 Coin Flip Бонус!</h2>
+                        <p>Ваша ставка: ${betAmount}₽</p>
+                        <div class="coinflip-options">
+                            <div class="color-btn color-red" data-color="red">🔴 КРАСНЫЙ</div>
+                            <div class="color-btn color-blue" data-color="blue">🔵 СИНИЙ</div>
+                        </div>
+                        <div id="coinflipResult"></div>
+                    </div>
+                `
+            },
+            cashhunt: {
+                multipliers: [
+                    { value: 7, weight: 40 }, { value: 10, weight: 30 }, { value: 15, weight: 20 },
+                    { value: 25, weight: 15 }, { value: 40, weight: 10 }, { value: 60, weight: 7 },
+                    { value: 80, weight: 5 }, { value: 100, weight: 4 }, { value: 150, weight: 3 },
+                    { value: 200, weight: 2 }, { value: 250, weight: 1 }
+                ],
+                content: `
+                    <div class="bonus-game">
+                        <h2>💰 Cash Hunt Бонус!</h2>
+                        <p>Выберите ячейку! Ставка: ${betAmount}₽</p>
+                        <div class="cash-grid" id="cashGrid">
+                            ${Array(28).fill().map((_, i) => `<div class="cash-cell" data-cell="${i}">❓</div>`).join('')}
+                        </div>
+                        <div id="cashResult"></div>
+                    </div>
+                `
+            },
+            pachinko: {
+                multipliers: [
+                    { value: 5, weight: 25 }, { value: 8, weight: 20 }, { value: 10, weight: 18 },
+                    { value: 15, weight: 15 }, { value: 20, weight: 10 }, { value: 30, weight: 6 },
+                    { value: 50, weight: 3 }, { value: 75, weight: 2 }, { value: 100, weight: 1 },
+                    { value: 150, weight: 0.5 }
+                ],
+                content: `
+                    <div class="bonus-game">
+                        <h2>⚙️ Pachinko Бонус!</h2>
+                        <p>Ставка: ${betAmount}₽</p>
+                        <button id="dropPachinko" class="btn-gold">🎯 Бросить шарик</button>
+                        <div class="pachinko-slots" id="pachinkoSlots">
+                            ${[5,8,10,15,20,30,50,75,100,150].map(m => `<div class="pachinko-slot">x${m}</div>`).join('')}
+                        </div>
+                        <div id="pachinkoResult"></div>
+                    </div>
+                `
+            },
+            crazytime: {
+                multipliers: [
+                    { value: 30, weight: 25 }, { value: 50, weight: 20 }, { value: 75, weight: 18 },
+                    { value: 100, weight: 15 }, { value: 150, weight: 10 }, { value: 200, weight: 5 },
+                    { value: 300, weight: 3 }, { value: 500, weight: 2 }, { value: 750, weight: 1 },
+                    { value: 1000, weight: 0.7 }, { value: 1500, weight: 0.3 }
+                ],
+                content: `
+                    <div class="bonus-game">
+                        <h2>🎡 Crazy Time Бонусное колесо!</h2>
+                        <p>Ставка: ${betAmount}₽</p>
+                        <button id="spinCrazyWheel" class="btn-gold">🎡 Крутить колесо!</button>
+                        <div id="crazyWheelResult"></div>
+                    </div>
+                `
+            }
+        };
+
+        const config = bonusConfigs[bonusType];
+        if (!config) return;
+
+        modal.innerHTML = `<div class="modal-window">${config.content}<button id="closeBonus" style="margin-top:20px; background:#7f1a2a;">Закрыть</button></div>`;
+        document.body.appendChild(modal);
+
+        // Обработчики для бонусов
+        if (bonusType === 'coinflip') {
+            let selected = false;
+            document.querySelectorAll('.color-btn').forEach(btn => {
+                btn.onclick = () => {
+                    if (selected) return;
+                    selected = true;
+                    const multiplier = getWeightedMultiplier(config.multipliers);
+                    const winAmount = betAmount * multiplier;
+                    addWin(winAmount);
+                    document.getElementById('coinflipResult').innerHTML = `<h3>🎉 Множитель x${multiplier}! Выигрыш: ${winAmount}₽</h3>`;
+                    addGameRecord("Crazy Time (CoinFlip)", betAmount, winAmount, `бонус x${multiplier}`);
+                };
+            });
+        } else if (bonusType === 'cashhunt') {
+            document.querySelectorAll('.cash-cell').forEach(cell => {
+                cell.onclick = () => {
+                    const multiplier = getWeightedMultiplier(config.multipliers);
+                    const winAmount = betAmount * multiplier;
+                    addWin(winAmount);
+                    cell.innerHTML = `x${multiplier}`;
+                    cell.style.background = '#2b6ef0';
+                    document.getElementById('cashResult').innerHTML = `<h3>🎉 Множитель x${multiplier}! Выигрыш: ${winAmount}₽</h3>`;
+                    addGameRecord("Crazy Time (Cash Hunt)", betAmount, winAmount, `бонус x${multiplier}`);
+                    document.querySelectorAll('.cash-cell').forEach(c => c.onclick = null);
+                };
+            });
+        } else if (bonusType === 'pachinko') {
+            document.getElementById('dropPachinko').onclick = () => {
+                const multiplier = getWeightedMultiplier(config.multipliers);
+                const winAmount = betAmount * multiplier;
+                addWin(winAmount);
+                document.getElementById('pachinkoResult').innerHTML = `<h3>🎯 Шарик упал на x${multiplier}! Выигрыш: ${winAmount}₽</h3>`;
+                addGameRecord("Crazy Time (Pachinko)", betAmount, winAmount, `бонус x${multiplier}`);
+            };
+        } else if (bonusType === 'crazytime') {
+            document.getElementById('spinCrazyWheel').onclick = () => {
+                const multiplier = getWeightedMultiplier(config.multipliers);
+                const winAmount = betAmount * multiplier;
+                addWin(winAmount);
+                document.getElementById('crazyWheelResult').innerHTML = `<h3>🎡 Колесо показало x${multiplier}! Выигрыш: ${winAmount}₽</h3>`;
+                addGameRecord("Crazy Time (Бонус)", betAmount, winAmount, `бонус x${multiplier}`);
+            };
+        }
+
+        document.getElementById('closeBonus').onclick = () => modal.remove();
+    }
+
+    // ========== СИСТЕМА АВТОРИЗАЦИИ ==========
+    function showAuthModal() {
+        const authDiv = document.getElementById('authContainer');
+        authDiv.innerHTML = `
+            <div class="modal-overlay" id="authOverlay">
+                <div class="modal-window">
+                    <h2 style="text-align:center; margin-bottom:25px;">🎮 KBgames</h2>
+                    <div style="display:flex; gap:15px; margin-bottom:20px;">
+                        <button id="showLoginBtn" class="btn-gold" style="flex:1;">Вход</button>
+                        <button id="showRegisterBtn" style="flex:1; background:#1f2a48;">Регистрация</button>
+                    </div>
+                    <div id="loginPanel">
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <input type="text" id="loginContact" placeholder="Телефон или Email" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <input type="password" id="loginPassword" placeholder="Пароль" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <button id="doLoginBtn" class="btn-gold">Войти</button>
+                        </div>
+                    </div>
+                    <div id="registerPanel" style="display:none;">
+                        <div style="display:flex; flex-direction:column; gap:15px;">
+                            <input type="text" id="regName" placeholder="Имя" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <input type="text" id="regSurname" placeholder="Фамилия" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <input type="text" id="regNickname" placeholder="Никнейм" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <input type="text" id="regContact" placeholder="Телефон или Email" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <input type="password" id="regPassword" placeholder="Пароль (мин. 8 символов)" style="padding:12px; background:#0c1530; border:1px solid #2b6ef0; border-radius:30px; color:white;">
+                            <button id="doRegisterBtn" class="btn-gold">Зарегистрироваться</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.getElementById('showLoginBtn').onclick = () => {
+            document.getElementById('loginPanel').style.display = 'block';
+            document.getElementById('registerPanel').style.display = 'none';
+            document.getElementById('showLoginBtn').classList.add('btn-gold');
+            document.getElementById('showRegisterBtn').classList.remove('btn-gold');
+            document.getElementById('showRegisterBtn').style.background = '#1f2a48';
+        };
+        
+        document.getElementById('showRegisterBtn').onclick = () => {
+            document.getElementById('loginPanel').style.display = 'none';
+            document.getElementById('registerPanel').style.display = 'block';
+            document.getElementById('showRegisterBtn').classList.add('btn-gold');
+            document.getElementById('showLoginBtn').classList.remove('btn-gold');
+            document.getElementById('showLoginBtn').style.background = '#1f2a48';
+        };
+        
+        document.getElementById('doLoginBtn').onclick = () => {
+            const contact = document.getElementById('loginContact').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const saved = localStorage.getItem('kbgames_user');
+            
+            if (saved) {
+                const user = JSON.parse(saved);
+                if (user.contact === contact && user.password === password) {
+                    userData = user;
+                    initializeAppAfterAuth();
+                } else {
+                    showToast("Неверные данные!", true);
+                }
+            } else {
+                showToast("Пользователь не найден!", true);
+            }
+        };
+        
+        document.getElementById('doRegisterBtn').onclick = () => {
+            const name = document.getElementById('regName').value.trim();
+            const surname = document.getElementById('regSurname').value.trim();
+            const nickname = document.getElementById('regNickname').value.trim();
+            const contact = document.getElementById('regContact').value.trim();
+            const password = document.getElementById('regPassword').value;
+            
+            if (!name || !surname || !nickname || !contact || !password) {
+                showToast("Заполните все поля!", true);
+                return;
+            }
+            if (password.length < 8) {
+                showToast("Пароль минимум 8 символов!", true);
+                return;
+            }
+            
+            userData = {
+                name, surname, nickname, contact, password,
+                balance: 5000,
+                theme: 'dark'
+            };
+            localStorage.setItem('kbgames_user', JSON.stringify(userData));
+            initializeAppAfterAuth();
+        };
+    }
+
+    function initializeAppAfterAuth() {
+        balance = userData.balance;
+        currentNickname = userData.nickname;
+        gameHistory = JSON.parse(localStorage.getItem('kbgames_history') || '[]');
+        depositHistory = JSON.parse(localStorage.getItem('kbgames_deposits') || '[]');
+        withdrawHistory = JSON.parse(localStorage.getItem('kbgames_withdraws') || '[]');
+        
+        document.getElementById('authContainer').style.display = 'none';
+        document.getElementById('appContainer').style.display = 'block';
+        initApp();
+    }
+
+    // ========== ОСНОВНАЯ ИНИЦИАЛИЗАЦИЯ ПРИЛОЖЕНИЯ ==========
+    function initApp() {
+        document.body.classList.add(`theme-${userData.theme || 'dark'}`);
+        
+        const appDiv = document.getElementById('appContainer');
+        appDiv.innerHTML = `
+            <div class="app">
+                <div class="sidebar">
+                    <div class="logo">🎮 KBgames</div>
+                    <div class="nav-item active" data-tab="home">🏠 Главная</div>
+                    <div class="nav-item" data-tab="crazytime">🎡 Crazy Time</div>
+                    <div class="nav-item" data-tab="roulette">🎰 Рулетка</div>
+                    <div class="nav-item" data-tab="doghouse">🐶 Dog House</div>
+                    <div class="nav-item" data-tab="crash">🚀 Crash</div>
+                    <div class="nav-item" data-tab="sports">⚽ Спорт</div>
+                    <div class="nav-item" data-tab="dice">🎲 Кости</div>
+                    <div class="nav-item" data-tab="profile">👤 Кабинет</div>
+                    <div class="nav-item" data-tab="finance">💳 Финансы</div>
+                    <div class="nav-item" data-tab="settings">⚙️ Настройки</div>
+                </div>
+                <div class="main-content">
+                    <div class="user-panel">
+                        <span>👋 <span id="nicknameDisplay">${currentNickname}</span></span>
+                        <span class="balance">💰 <span id="balanceAmount">${balance}</span> ₽</span>
+                    </div>
+                    <div id="home" class="game-section active-game">
+                        <div class="home-hero">
+                            <h1 style="font-size:42px;">⚡ KBGAMES ⚡</h1>
+                            <p>Crazy Time, Рулетка, Dog House, Crash, Спорт, Кости</p>
+                        </div>
+                        <div class="game-grid">
+                            <div class="game-card-new" data-nav="crazytime">🎡 Crazy Time</div>
+                            <div class="game-card-new" data-nav="roulette">🎰 Рулетка</div>
+                            <div class="game-card-new" data-nav="doghouse">🐶 Dog House</div>
+                            <div class="game-card-new" data-nav="crash">🚀 Crash</div>
+                            <div class="game-card-new" data-nav="sports">⚽ Спорт</div>
+                            <div class="game-card-new" data-nav="dice">🎲 Кости</div>
+                        </div>
+                    </div>
+                    <div id="crazytime" class="game-section"><h2>🎡 Crazy Time</h2><div id="crazyGameArea"></div></div>
+                    <div id="roulette" class="game-section"><h2>🎰 Европейская рулетка</h2><div id="rouletteArea"></div></div>
+                    <div id="doghouse" class="game-section"><h2>🐶 Dog House</h2><div id="doghouseArea"></div></div>
+                    <div id="crash" class="game-section"><h2>🚀 CRASH</h2><div id="crashArea"></div></div>
+                    <div id="sports" class="game-section"><h2>⚽ Ставки на спорт</h2><div id="sportsArea"></div></div>
+                    <div id="dice" class="game-section"><h2>🎲 Кости</h2><div id="diceArea"></div></div>
+                    <div id="profile" class="game-section">
+                        <h2>👤 Кабинет</h2>
+                        <div class="profile-row">
+                            <span>📛 Сменить ник: </span>
+                            <input type="text" id="newNicknameInput" placeholder="Новый никнейм" style="background:#0c1530; border:1px solid #2b6ef0; padding:8px 16px; border-radius:30px; color:white;">
+                            <button id="changeNicknameBtn" class="btn-gold">Изменить</button>
+                        </div>
+                        <p>💰 Баланс: <strong id="profileBalance">${balance}</strong> ₽</p>
+                        <button id="clearHistoryBtn" style="background: #7f1a2a;">Очистить историю</button>
+                        <h3>📜 История игр</h3>
+                        <div id="gameHistoryList" class="history-list"></div>
+                        <h3>➕ Пополнения</h3>
+                        <div id="depositHistoryList" class="history-list"></div>
+                        <h3>➖ Выводы</h3>
+                        <div id="withdrawHistoryList" class="history-list"></div>
+                    </div>
+                    <div id="finance" class="game-section"><h2>💳 Финансы</h2><div id="financeArea"></div></div>
+                    <div id="settings" class="game-section"><h2>⚙️ Настройки</h2><div id="settingsArea"></div></div>
+                </div>
+            </div>
+        `;
+        
+        updateBalanceUI();
+        updateNicknameUI();
+        renderHistory();
+        initGameModules();
+        initNavigation();
+    }
+
+    // ========== ИНИЦИАЛИЗАЦИЯ ИГРОВЫХ МОДУЛЕЙ ==========
+    function initGameModules() {
+        initCrazyTime();
+        initDogHouse();
+        initRoulette();
+        initCrash();
+        initSports();
+        initDice();
+        initFinance();
+        initSettings();
+    }
+
+    function initNavigation() {
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                document.querySelectorAll('.game-section').forEach(section => {
+                    section.classList.remove('active-game');
+                });
+                document.getElementById(item.dataset.tab).classList.add('active-game');
+                document.querySelectorAll('.nav-item').forEach(nav => {
+                    nav.classList.remove('active');
+                });
+                item.classList.add('active');
+            });
+        });
+        
+        document.querySelectorAll('.game-card-new').forEach(card => {
+            card.addEventListener('click', () => {
+                document.querySelector(`.nav-item[data-tab="${card.dataset.nav}"]`).click();
+            });
+        });
+        
+        document.getElementById('clearHistoryBtn')?.addEventListener('click', () => {
+            if (confirm("Очистить всю историю?")) {
+                gameHistory = [];
+                depositHistory = [];
+                withdrawHistory = [];
+                renderHistory();
+                showToast("История очищена");
+                saveAllData();
+            }
+        });
+        
+        document.getElementById('changeNicknameBtn')?.addEventListener('click', () => {
+            const newName = document.getElementById('newNicknameInput').value.trim();
+            if (newName.length >= 1 && newName.length <= 20) {
+                currentNickname = newName;
+                updateNicknameUI();
+                showToast(`Никнейм изменён на ${currentNickname}`);
+            } else {
+                showToast("Никнейм должен быть от 1 до 20 символов", true);
+            }
+        });
+    }
+
+    // ========== CRAZY TIME ==========
+    function initCrazyTime() {
+        const crazySegments = [];
+        const segmentConfig = [
+            { type: "x1", count: 19 },
+            { type: "x2", count: 13 },
+            { type: "x5", count: 7 },
+            { type: "x10", count: 4 },
+            { type: "coinflip", count: 4 },
+            { type: "cashhunt", count: 2 },
+            { type: "pachinko", count: 2 },
+            { type: "crazytime", count: 1 }
+        ];
+        
+        segmentConfig.forEach(config => {
+            for (let i = 0; i < config.count; i++) {
+                crazySegments.push(config.type);
+            }
+        });
+        
+        // Перемешивание
+        for (let i = crazySegments.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [crazySegments[i], crazySegments[j]] = [crazySegments[j], crazySegments[i]];
+        }
+        
+        let selectedCrazyBets = new Map();
+        let rotationAngle = 0;
+        let isSpinning = false;
+        let canvas = null;
+        let ctx = null;
+        
+        document.getElementById('crazyGameArea').innerHTML = `
+            <div class="game-container">
+                <div class="info-block">
+                    <strong>📊 Комбинации:</strong> x1(48.7%), x2(33.3%), x5(17.9%), x10(10.3%), Бонусы(23%)
+                </div>
+                <div><strong>Выберите сектор (ставка кратна 10):</strong></div>
+                <div class="crazy-bets" id="crazyBetsContainer">
+                    ${[...new Set(crazySegments)].map(s => `<div class="crazy-bet-btn" data-bet="${s}">${s}</div>`).join('')}
+                </div>
+                <div class="bet-input">
+                    <input id="crazyBetAmount" value="50" step="10">
+                    <button id="addCrazyBet">➕ Добавить ставку</button>
+                </div>
+                <div id="selectedBetsList"></div>
+                <button id="doCrazySpin" class="btn-gold">🎡 КРУТИТЬ</button>
+                <canvas id="crazyCanvas" width="400" height="400"></canvas>
+            </div>
+        `;
+        
+        canvas = document.getElementById('crazyCanvas');
+        ctx = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 400;
+        
+        function drawCrazyWheel() {
+            if (!ctx) return;
+            const w = canvas.width;
+            const step = 2 * Math.PI / crazySegments.length;
+            ctx.clearRect(0, 0, w, w);
+            
+            for (let i = 0; i < crazySegments.length; i++) {
+                const start = rotationAngle + i * step;
+                const end = start + step;
+                let color = "#c98500";
+                
+                if (crazySegments[i] === "coinflip") color = "#4caf50";
+                else if (crazySegments[i] === "cashhunt") color = "#2196f3";
+                else if (crazySegments[i] === "pachinko") color = "#9c27b0";
+                else if (crazySegments[i] === "crazytime") color = "#f44336";
+                else if (crazySegments[i].startsWith("x")) color = "#e0a800";
+                
+                ctx.beginPath();
+                ctx.moveTo(w / 2, w / 2);
+                ctx.arc(w / 2, w / 2, w / 2, start, end);
+                ctx.fillStyle = color;
+                ctx.fill();
+                
+                ctx.save();
+                ctx.translate(w / 2, w / 2);
+                ctx.rotate(start + step / 2);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 10px sans-serif";
+                ctx.fillText(crazySegments[i], w * 0.35, 8);
+                ctx.restore();
+            }
+            
+            ctx.fillStyle = "gold";
+            ctx.beginPath();
+            ctx.arc(w / 2, w / 2, 18, 0, 2 * Math.PI);
+            ctx.fill();
+            ctx.fillStyle = "red";
+            ctx.beginPath();
+            ctx.moveTo(w / 2 - 12, 8);
+            ctx.lineTo(w / 2 + 12, 8);
+            ctx.lineTo(w / 2, 24);
+            ctx.fill();
+        }
+        
+        function spinCrazyTime() {
+            if (isSpinning) return;
+            
+            let totalBet = 0;
+            for (let bet of selectedCrazyBets.values()) totalBet += bet;
+            
+            if (totalBet === 0) {
+                showToast("Выберите сектора для ставок!", true);
+                return;
+            }
+            if (!checkBalance(totalBet)) return;
+            
+            deductBet(totalBet);
+            isSpinning = true;
+            
+            const targetIdx = Math.floor(Math.random() * crazySegments.length);
+            const result = crazySegments[targetIdx];
+            const spins = 10 * Math.PI + Math.random() * 5;
+            const startRot = rotationAngle;
+            const startTime = performance.now();
+            
+            function animate(now) {
+                const elapsed = Math.min(1, (now - startTime) / 800);
+                if (elapsed >= 1) {
+                    rotationAngle = (startRot + targetIdx * 2 * Math.PI / crazySegments.length) % (2 * Math.PI);
+                    drawCrazyWheel();
+                    isSpinning = false;
+                    
+                    const multipliers = { x1: 1, x2: 2, x5: 5, x10: 10 };
+                    let totalWin = 0;
+                    
+                    if (selectedCrazyBets.has(result)) {
+                        const betAmount = selectedCrazyBets.get(result);
+                        if (multipliers[result]) {
+                            totalWin = betAmount * multipliers[result];
+                            addWin(totalWin);
+                            showToast(`Выпало ${result}! Выигрыш ${Math.floor(totalWin)}₽`);
+                            addGameRecord("Crazy Time", totalBet, totalWin, `выпало ${result}`);
+                        } else {
+                            showBonusGame(result, betAmount);
+                            totalWin = 0;
+                        }
+                    } else if (!['coinflip', 'cashhunt', 'pachinko', 'crazytime'].includes(result)) {
+                        showToast(`Выпало ${result}. Проигрыш`);
+                        addGameRecord("Crazy Time", totalBet, 0, `проигрыш (${result})`);
+                    }
+                    
+                    selectedCrazyBets.clear();
+                    document.getElementById('selectedBetsList').innerHTML = '';
+                    return;
+                }
+                
+                const rot = startRot + spins * Math.pow(elapsed, 0.5);
+                rotationAngle = rot;
+                drawCrazyWheel();
+                requestAnimationFrame(animate);
+            }
+            
+            requestAnimationFrame(animate);
+        }
+        
+        let currentSelected = null;
+        document.querySelectorAll('.crazy-bet-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.crazy-bet-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                currentSelected = this.dataset.bet;
+            });
+        });
+        
+        document.getElementById('addCrazyBet').onclick = () => {
+            if (!currentSelected) {
+                showToast("Сначала выберите сектор!", true);
+                return;
+            }
+            const amount = parseInt(document.getElementById('crazyBetAmount').value);
+            if (amount > 0 && amount % 10 === 0) {
+                selectedCrazyBets.set(currentSelected, (selectedCrazyBets.get(currentSelected) || 0) + amount);
+                const betsList = document.getElementById('selectedBetsList');
+                betsList.innerHTML = `
+                    <strong>Ставки:</strong> ${Array.from(selectedCrazyBets.entries()).map(([k, v]) => `${k}:${v}₽`).join(', ')}
+                    <br><button id="clearBets">Очистить</button>
+                `;
+                document.getElementById('clearBets')?.addEventListener('click', () => {
+                    selectedCrazyBets.clear();
+                    betsList.innerHTML = '';
+                });
+            } else {
+                showToast("Ставка должна быть положительной и кратной 10!", true);
+            }
+        };
+        
+        document.getElementById('doCrazySpin').onclick = spinCrazyTime;
+        drawCrazyWheel();
+    }
+
+    // ========== DOG HOUSE ==========
+    function initDogHouse() {
+        const dogSymbols = ['🐕', '🐩', '🐺', '🐶', '🦴', '🦒', '🦊', '⭐WILD'];
+        const dogPaytable = {
+            '🐕': { 3: 5, 4: 15, 5: 40 },
+            '🐩': { 3: 4, 4: 12, 5: 30 },
+            '🐺': { 3: 3, 4: 10, 5: 25 },
+            '🐶': { 3: 2, 4: 8, 5: 20 },
+            '🦴': { 3: 1, 4: 5, 5: 15 },
+            '🦒': { 3: 6, 4: 18, 5: 45 },
+            '🦊': { 3: 4, 4: 12, 5: 28 }
+        };
+        
+        function generateDogRow() {
+            const row = [];
+            for (let j = 0; j < 5; j++) {
+                if (j >= 1 && j <= 3 && Math.random() < 0.08) {
+                    row.push('⭐WILD');
+                } else {
+                    row.push(dogSymbols[Math.floor(Math.random() * (dogSymbols.length - 1))]);
+                }
+            }
+            return row;
+        }
+        
+        function calculateWin(grid, bet) {
+            let totalWin = 0;
+            for (let row = 0; row < 3; row++) {
+                const line = grid[row];
+                let col = 0;
+                while (col < 5) {
+                    let currentSym = line[col];
+                    if (currentSym === '⭐WILD') {
+                        let nextNonWild = null;
+                        for (let k = col; k < 5; k++) {
+                            if (line[k] !== '⭐WILD') {
+                                nextNonWild = line[k];
+                                break;
+                            }
+                        }
+                        if (nextNonWild) currentSym = nextNonWild;
+                        else break;
+                    }
+                    if (currentSym === '⭐WILD') {
+                        col++;
+                        continue;
+                    }
+                    
+                    let length = 0;
+                    for (let j = col; j < 5; j++) {
+                        const sym = line[j];
+                        if (sym === currentSym || sym === '⭐WILD') length++;
+                        else break;
+                    }
+                    
+                    if (length >= 3 && dogPaytable[currentSym]) {
+                        const multiplier = dogPaytable[currentSym][length] || dogPaytable[currentSym][5] || 0;
+                        totalWin += bet * multiplier;
+                    }
+                    col++;
+                }
+            }
+            return totalWin;
+        }
+        
+        function spinDogHouse(bet) {
+            if (!checkBalance(bet)) return;
+            deductBet(bet);
+            
+            const grid = [];
+            for (let i = 0; i < 3; i++) {
+                grid.push(generateDogRow());
+            }
+            
+            animateDogSpin(grid, bet);
+        }
+        
+        function animateDogSpin(grid, bet) {
+            let steps = 0;
+            const interval = setInterval(() => {
+                const temp = [];
+                for (let i = 0; i < 3; i++) {
+                    const row = [];
+                    for (let j = 0; j < 5; j++) {
+                        if (steps < 10) {
+                            row.push(dogSymbols[Math.floor(Math.random() * dogSymbols.length)]);
+                        } else {
+                            row.push(grid[i][j]);
+                        }
+                    }
+                    temp.push(row);
+                }
+                renderDogGrid(temp);
+                steps++;
+                
+                if (steps >= 12) {
+                    clearInterval(interval);
+                    const win = calculateWin(grid, bet);
+                    if (win > 0) {
+                        addWin(win);
+                        showToast(`Dog House: +${win}₽`);
+                        addGameRecord("Dog House", bet, win, `выигрыш ${win}₽`);
+                    } else {
+                        showToast(`Dog House: проигрыш`);
+                        addGameRecord("Dog House", bet, 0, `проигрыш`);
+                    }
+                    document.getElementById('dogResultDisplay').innerHTML = `<strong>🎰 Выигрыш: ${win}₽</strong>`;
+                }
+            }, 100);
+        }
+        
+        function renderDogGrid(grid) {
+            let html = '<div class="slots-grid">';
+            for (let i = 0; i < 3; i++) {
+                for (let j = 0; j < 5; j++) {
+                    html += `<div class="slot-cell">${grid[i][j]}</div>`;
+                }
+            }
+            html += '</div>';
+            document.getElementById('dogGrid').innerHTML = html;
+        }
+        
+        document.getElementById('doghouseArea').innerHTML = `
+            <div class="game-container">
+                <div class="info-block">
+                    <strong>📊 Выигрыши (за 3+ одинаковых в строке):</strong> 🦒 x6/x18/x45 | 🐕 x5/x15/x40 | 🦊 x4/x12/x28 | 🐩 x4/x12/x30 | 🐺 x3/x10/x25 | 🐶 x2/x8/x20 | 🦴 x1/x5/x15 | ⭐WILD (редко, только в 2-4 позициях)
+                </div>
+                <div class="bet-input">
+                    <input id="dogBet" value="50">
+                    <button id="dogSpinBtn" class="btn-gold">Крутить</button>
+                </div>
+                <div id="dogGrid"></div>
+                <div id="dogResultDisplay" class="dog-result"></div>
+            </div>
+        `;
+        
+        document.getElementById('dogSpinBtn').onclick = () => {
+            const bet = parseInt(document.getElementById('dogBet').value);
+            spinDogHouse(isNaN(bet) ? 50 : bet);
+        };
+        
+        // Первый спин для отображения
+        spinDogHouse(50);
+    }
+
+    // ========== РУЛЕТКА ==========
+    function initRoulette() {
+        document.getElementById('rouletteArea').innerHTML = `
+            <div class="game-container">
+                <div class="info-block">
+                    <strong>📊 Ставки:</strong> Номер (x35, 2.7%) | Красное/Черное (x2, 48.6%) | 1-12/13-24/25-36 (x3, 32.4%) | 1-18/19-36 (x2, 48.6%)
+                </div>
+                <div class="bet-input">
+                    <input id="rouBet" value="50">
+                    <button id="spinRouBtn" class="btn-gold">Крутить</button>
+                </div>
+                <div class="roulette-buttons">
+                    <button class="roul-bet" data-type="number">🎯 Номер</button>
+                    <button class="roul-bet" data-type="color" data-val="red">🔴 Красное</button>
+                    <button class="roul-bet" data-type="color" data-val="black">⚫ Черное</button>
+                    <button class="roul-bet" data-type="dozen" data-val="1-12">1-12</button>
+                    <button class="roul-bet" data-type="dozen" data-val="13-24">13-24</button>
+                    <button class="roul-bet" data-type="dozen" data-val="25-36">25-36</button>
+                    <button class="roul-bet" data-type="half" data-val="1-18">1-18</button>
+                    <button class="roul-bet" data-type="half" data-val="19-36">19-36</button>
+                </div>
+                <div><input id="rouNumberSelect" placeholder="Номер 0-36"></div>
+                <canvas id="rouCanvas" width="400" height="400"></canvas>
+            </div>
+        `;
+        
+        const canvas = document.getElementById('rouCanvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 400;
+        canvas.height = 400;
+        
+        function drawRoulette() {
+            const w = 400;
+            const step = 2 * Math.PI / 37;
+            ctx.clearRect(0, 0, w, w);
+            
+            for (let i = 0; i < 37; i++) {
+                const start = i * step;
+                ctx.beginPath();
+                ctx.moveTo(w / 2, w / 2);
+                ctx.arc(w / 2, w / 2, w / 2, start, start + step);
+                ctx.fillStyle = i === 0 ? "#2e7d32" : (i % 2 === 0 ? "#c00" : "#1a1a2e");
+                ctx.fill();
+                ctx.save();
+                ctx.translate(w / 2, w / 2);
+                ctx.rotate(start + step / 2);
+                ctx.fillStyle = "white";
+                ctx.font = "bold 12px sans-serif";
+                ctx.fillText(i, w * 0.35, 10);
+                ctx.restore();
+            }
+            
+            ctx.fillStyle = "gold";
+            ctx.beginPath();
+            ctx.arc(w / 2, w / 2, 20, 0, 2 * Math.PI);
+            ctx.fill();
+        }
+        
+        drawRoulette();
+        
+        let currentRouletteBet = { type: "color", value: "red" };
+        
+        document.querySelectorAll('.roul-bet').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.roul-bet').forEach(b => b.classList.remove('selected-roulette'));
+                this.classList.add('selected-roulette');
+                const type = this.dataset.type;
+                const value = this.dataset.val;
+                currentRouletteBet = { type, value };
+                if (type === "number") currentRouletteBet.value = 0;
+            });
+        });
+        
+        document.getElementById('spinRouBtn').onclick = () => {
+            const bet = parseInt(document.getElementById('rouBet').value);
+            
+            if (currentRouletteBet.type === "number") {
+                const num = parseInt(document.getElementById('rouNumberSelect').value);
+                if (isNaN(num) || num < 0 || num > 36) {
+                    showToast("Введите номер от 0 до 36", true);
+                    return;
+                }
+                currentRouletteBet.value = num;
+            }
+            
+            if (!checkBalance(bet)) return;
+            deductBet(bet);
+            
+            const target = Math.floor(Math.random() * 37);
+            let win = 0;
+            
+            if (currentRouletteBet.type === "number" && target === currentRouletteBet.value) {
+                win = bet * 35;
+            } else if (currentRouletteBet.type === "color" && target !== 0) {
+                const isRed = (target % 2 === 0 && target !== 0);
+                if ((currentRouletteBet.value === "red" && isRed) || (currentRouletteBet.value === "black" && !isRed)) {
+                    win = bet * 2;
+                }
+            } else if (currentRouletteBet.type === "dozen") {
+                if (target >= 1 && target <= 12 && currentRouletteBet.value === "1-12") win = bet * 3;
+                if (target >= 13 && target <= 24 && currentRouletteBet.value === "13-24") win = bet * 3;
+                if (target >= 25 && target <= 36 && currentRouletteBet.value === "25-36") win = bet * 3;
+            } else if (currentRouletteBet.type === "half") {
+                if (target >= 1 && target <= 18 && currentRouletteBet.value === "1-18") win = bet * 2;
+                if (target >= 19 && target <= 36 && currentRouletteBet.value === "19-36") win = bet * 2;
+            }
+            
+            if (win > 0) {
+                addWin(win);
+                showToast(`Рулетка: ${target}! Выигрыш ${win}₽`);
+                addGameRecord("Рулетка", bet, win, `выпало ${target}`);
+            } else {
+                showToast(`Рулетка: ${target}. Проигрыш`);
+                addGameRecord("Рулетка", bet, 0, `выпало ${target}`);
+            }
+        };
+    }
+
+    // ========== CRASH ==========
+    function initCrash() {
+        document.getElementById('crashArea').innerHTML = `
+            <div class="crash-container">
+                <div class="graph-wrapper">
+                    <canvas id="crashCanvas" width="1000" height="320"></canvas>
+                    <div class="multiplier-badge" id="liveMultiplier">1.00x</div>
+                </div>
+                <div style="display:flex; gap:20px;">
+                    <input id="crashBet" value="100">
+                    <button id="crashStart" class="crash-btn">Старт</button>
+                    <button id="crashCashout" class="crash-btn cashout" style="display:none;">Забрать</button>
+                </div>
+                <div id="crashStatus" class="status-text">Готов</div>
+                <div class="info-block">
+                    <strong>📊 Crash:</strong> Множитель растет со временем, нужно забрать до краха! Чем выше множитель - тем реже выпадает.
+                </div>
+            </div>
+        `;
+        
+        let crashActive = false;
+        let crashMult = 1;
+        let crashBet = 0;
+        let crashMax = 1;
+        let crashInterval = null;
+        
+        function generateCrashPoint() {
+            const r = Math.random();
+            if (r < 0.05) return 1 + Math.random() * 0.5;
+            if (r < 0.25) return 1.5 + Math.random() * 1.5;
+            if (r < 0.55) return 3 + Math.random() * 3;
+            if (r < 0.78) return 6 + Math.random() * 6;
+            if (r < 0.94) return 12 + Math.random() * 15;
+            return 27 + Math.random() * 73;
+        }
+        
+        document.getElementById('crashStart').onclick = () => {
+            if (crashActive) return;
+            const bet = parseInt(document.getElementById('crashBet').value);
+            if (!checkBalance(bet)) return;
+            
+            deductBet(bet);
+            crashBet = bet;
+            crashActive = true;
+            crashMult = 1;
+            crashMax = generateCrashPoint();
+            
+            document.getElementById('crashCashout').style.display = 'inline-block';
+            document.getElementById('crashStart').style.display = 'none';
+            document.getElementById('crashStatus').innerHTML = '🚀 Игра началась! Заберите выигрыш до краха!';
+            
+            const startTime = Date.now();
+            crashInterval = setInterval(() => {
+                if (!crashActive) {
+                    clearInterval(crashInterval);
+                    return;
+                }
+                
+                const elapsed = (Date.now() - startTime) / 1000;
+                crashMult = Math.min(1 + Math.pow(elapsed, 1.6) * 0.6, crashMax);
+                document.getElementById('liveMultiplier').innerText = crashMult.toFixed(2) + 'x';
+                
+                if (crashMult >= crashMax) {
+                    clearInterval(crashInterval);
+                    crashActive = false;
+                    document.getElementById('crashCashout').style.display = 'none';
+                    document.getElementById('crashStart').style.display = 'inline-block';
+                    document.getElementById('crashStatus').innerHTML = `💥 Крах на x${crashMax.toFixed(2)}! Проигрыш ${crashBet}₽`;
+                    addGameRecord("Crash", crashBet, 0, `крах x${crashMax.toFixed(2)}`);
+                }
+            }, 50);
+        };
+        
+        document.getElementById('crashCashout').onclick = () => {
+            if (crashActive) {
+                const win = crashBet * crashMult;
+                addWin(win);
+                showToast(`Забрали x${crashMult.toFixed(2)}! +${Math.floor(win)}₽`);
+                addGameRecord("Crash", crashBet, win, `кэшаут x${crashMult.toFixed(2)}`);
+                crashActive = false;
+                clearInterval(crashInterval);
+                document.getElementById('crashCashout').style.display = 'none';
+                document.getElementById('crashStart').style.display = 'inline-block';
+                document.getElementById('crashStatus').innerHTML = '✅ Вы успешно забрали выигрыш!';
+            }
+        };
+    }
+
+    // ========== СПОРТ ==========
+    function initSports() {
+        document.getElementById('sportsArea').innerHTML = `
+            <div class="game-container">
+                <div class="info-block">
+                    <strong>📊 Ставки на спорт:</strong> Вы угадываете исход матча. Коэффициенты: П1, X, П2. Результат определяется случайно с учетом вероятностей!
+                </div>
+                <div class="sport-events">
+                    <div class="event-card">
+                        <div>⚽ Челси - Ливерпуль</div>
+                        <div class="sport-odds">
+                            <button class="odd-btn" data-coef="2.3">П1 2.3</button>
+                            <button class="odd-btn" data-coef="3.2">X 3.2</button>
+                            <button class="odd-btn" data-coef="2.9">П2 2.9</button>
+                        </div>
+                        <div class="bet-input">
+                            <input id="sportBetVal" placeholder="Сумма">
+                            <button id="sportConfirmBtn" class="btn-gold">Ставка</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        let sportCoef = 2.3;
+        
+        document.querySelectorAll('.odd-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.odd-btn').forEach(b => b.classList.remove('selected'));
+                this.classList.add('selected');
+                sportCoef = parseFloat(this.dataset.coef);
+            });
+        });
+        
+        // Выбираем первую кнопку по умолчанию
+        document.querySelector('.odd-btn').classList.add('selected');
+        
+        document.getElementById('sportConfirmBtn').onclick = () => {
+            const bet = parseInt(document.getElementById('sportBetVal').value);
+            if (!checkBalance(bet)) return;
+            
+            deductBet(bet);
+            const outcomes = ['П1', 'X', 'П2'];
+            const probabilities = [0.4, 0.25, 0.35];
+            
+            let random = Math.random();
+            let result = 'П1';
+            let accum = 0;
+            
+            for (let i = 0; i < outcomes.length; i++) {
+                accum += probabilities[i];
+                if (random < accum) {
+                    result = outcomes[i];
+                    break;
+                }
+            }
+            
+            const selectedOutcome = document.querySelector('.odd-btn.selected')?.innerText.slice(0, 2);
+            const win = result === selectedOutcome ? bet * sportCoef : 0;
+            
+            if (win > 0) {
+                addWin(win);
+                showToast(`Выигрыш ${Math.floor(win)}₽`);
+                addGameRecord("Спорт", bet, win, `выигрыш (${result})`);
+            } else {
+                showToast(`Проигрыш. Результат: ${result}`);
+                addGameRecord("Спорт", bet, 0, `проигрыш (${result})`);
+            }
+        };
+    }
+
+    // ========== КОСТИ ==========
+    function initDice() {
+        document.getElementById('diceArea').innerHTML = `
+            <div class="dice-container">
+                <div class="info-block">
+                    <strong>📊 Кости:</strong> Сумма 7 - x5 (16.7%), Сумма 2 или 12 - x15 (5.6%), другие суммы - x8 (11.1%)
+                </div>
+                <div>
+                    <div id="dice1" class="dice">⚀</div>
+                    <div id="dice2" class="dice">⚀</div>
+                </div>
+                <div class="bet-input">
+                    <input id="diceBet" value="50">
+                    <select id="dicePred">
+                        <option value="7">Сумма 7 (x5)</option>
+                        <option value="2">Сумма 2 (x15)</option>
+                        <option value="12">Сумма 12 (x15)</option>
+                        <option value="3">Сумма 3 (x8)</option>
+                        <option value="4">Сумма 4 (x8)</option>
+                        <option value="5">Сумма 5 (x8)</option>
+                        <option value="6">Сумма 6 (x8)</option>
+                        <option value="8">Сумма 8 (x8)</option>
+                        <option value="9">Сумма 9 (x8)</option>
+                        <option value="10">Сумма 10 (x8)</option>
+                        <option value="11">Сумма 11 (x8)</option>
+                    </select>
+                    <button id="rollDiceBtn" class="btn-gold">🎲 Бросить</button>
+                </div>
+                <div id="diceResultMsg" class="status-text"></div>
+            </div>
+        `;
+        
+        const diceMap = { 1: '⚀', 2: '⚁', 3: '⚂', 4: '⚃', 5: '⚄', 6: '⚅' };
+        
+        document.getElementById('rollDiceBtn').onclick = () => {
+            const bet = parseInt(document.getElementById('diceBet').value);
+            if (!checkBalance(bet)) return;
+            
+            deductBet(bet);
+            const d1 = Math.floor(Math.random() * 6) + 1;
+            const d2 = Math.floor(Math.random() * 6) + 1;
+            const sum = d1 + d2;
+            
+            document.getElementById('dice1').innerHTML = diceMap[d1];
+            document.getElementById('dice2').innerHTML = diceMap[d2];
+            
+            const prediction = parseInt(document.getElementById('dicePred').value);
+            let multiplier;
+            
+            if (prediction === 7) multiplier = 5;
+            else if (prediction === 2 || prediction === 12) multiplier = 15;
+            else multiplier = 8;
+            
+            if (prediction === sum) {
+                const winAmount = bet * multiplier;
+                addWin(winAmount);
+                showToast(`Сумма ${sum}! Выигрыш ${winAmount}₽`);
+                addGameRecord("Кости", bet, winAmount, `сумма ${sum}`);
+                document.getElementById('diceResultMsg').innerHTML = `🎉 Победа! +${winAmount}₽`;
+            } else {
+                showToast(`Сумма ${sum}. Проигрыш`);
+                addGameRecord("Кости", bet, 0, `сумма ${sum}`);
+                document.getElementById('diceResultMsg').innerHTML = `❌ Проигрыш. Выпало ${sum}`;
+            }
+        };
+    }
+
+    // ========== ФИНАНСЫ ==========
+    function initFinance() {
+        document.getElementById('financeArea').innerHTML = `
+            <div class="finance-container">
+                <div class="finance-buttons">
+                    <div class="finance-btn active-finance" data-finance="deposit">➕ Пополнение</div>
+                    <div class="finance-btn" data-finance="withdraw">💳 Вывод</div>
+                </div>
+                <div id="depositPanel">
+                    <div class="finance-card">
+                        <h3>💰 Пополнение</h3>
+                        <div class="bet-input">
+                            <input id="depositAmount" placeholder="Сумма">
+                            <button id="confirmDeposit" class="btn-gold">Пополнить</button>
+                        </div>
+                    </div>
+                </div>
+                <div id="withdrawPanel" style="display:none;">
+                    <div class="finance-card">
+                        <h3>💸 Вывод</h3>
+                        <div class="bet-input">
+                            <input id="withdrawAmount" placeholder="Сумма">
+                            <button id="confirmWithdraw" class="btn-gold">Вывести</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        document.querySelectorAll('.finance-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                document.querySelectorAll('.finance-btn').forEach(b => b.classList.remove('active-finance'));
+                this.classList.add('active-finance');
+                document.getElementById('depositPanel').style.display = this.dataset.finance === 'deposit' ? 'block' : 'none';
+                document.getElementById('withdrawPanel').style.display = this.dataset.finance === 'withdraw' ? 'block' : 'none';
+            });
+        });
+        
+        document.getElementById('confirmDeposit').onclick = () => {
+            const amount = parseInt(document.getElementById('depositAmount').value);
+            if (amount > 0) {
+                balance += amount;
+                updateBalanceUI();
+                addDepositRecord(amount);
+                showToast(`Пополнение ${amount} ₽`);
+            } else {
+                showToast("Введите корректную сумму", true);
+            }
+        };
+        
+        document.getElementById('confirmWithdraw').onclick = () => {
+            const amount = parseInt(document.getElementById('withdrawAmount').value);
+            if (amount > 0 && amount <= balance) {
+                balance -= amount;
+                updateBalanceUI();
+                addWithdrawRecord(amount);
+                showToast(`Выведено ${amount} ₽`);
+            } else {
+                showToast("Недостаточно средств или неверная сумма", true);
+            }
+        };
+    }
+
+    // ========== НАСТРОЙКИ ==========
+    function initSettings() {
+        document.getElementById('settingsArea').innerHTML = `
+            <div class="game-container">
+                <h3>🎨 Тема оформления</h3>
+                <div class="bet-input">
+                    <button id="themeDark" class="${userData.theme === 'dark' ? 'btn-gold' : ''}">🌙 Темная</button>
+                    <button id="themeLight" class="${userData.theme === 'light' ? 'btn-gold' : ''}">☀️ Светлая</button>
+                </div>
+                <hr style="margin: 20px 0; border-color: #2b6ef0;">
+                <h3>👤 Информация об аккаунте</h3>
+                <p><strong>Имя:</strong> ${userData.name}</p>
+                <p><strong>Фамилия:</strong> ${userData.surname}</p>
+                <p><strong>Контакт:</strong> ${userData.contact}</p>
+            </div>
+        `;
+        
+        document.getElementById('themeDark').onclick = () => {
+            document.body.classList.remove('theme-light');
+            document.body.classList.add('theme-dark');
+            userData.theme = 'dark';
+            saveAllData();
+            initSettings(); // Обновляем кнопки
+        };
+        
+        document.getElementById('themeLight').onclick = () => {
+            document.body.classList.remove('theme-dark');
+            document.body.classList.add('theme-light');
+            userData.theme = 'light';
+            saveAllData();
+            initSettings();
+        };
+    }
+
+    // ========== ЗАПУСК ==========
+    const savedUser = localStorage.getItem('kbgames_user');
+    if (savedUser) {
+        userData = JSON.parse(savedUser);
+        initializeAppAfterAuth();
+    } else {
+        document.getElementById('authContainer').style.display = 'block';
+        showAuthModal();
+    }
+</script>
+</body>
+</html>
